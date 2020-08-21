@@ -29,6 +29,13 @@ function __extends(d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 }
 
+/*
+ * @Author: Whzcorcd
+ * @Date: 2020-08-20 15:48:37
+ * @LastEditors: Whzcorcd
+ * @LastEditTime: 2020-08-21 14:22:36
+ * @Description: file content
+ */
 var EventEmitter = /** @class */ (function () {
     function EventEmitter() {
         this.event = {};
@@ -47,7 +54,7 @@ var EventEmitter = /** @class */ (function () {
             this.event[type] = [listener];
         }
     };
-    //发送监听
+    // 发送监听
     EventEmitter.prototype.emit = function (type) {
         var _this = this;
         var args = [];
@@ -58,14 +65,14 @@ var EventEmitter = /** @class */ (function () {
             this.event[type].map(function (fn) { return fn.apply(_this, args); });
         }
     };
-    //移除监听器
+    // 移除监听器
     EventEmitter.prototype.removeListener = function (type) {
         if (this.event[type]) {
             delete this.event[type];
             console.log(this.event);
         }
     };
-    //移除所有的监听器
+    // 移除所有的监听器
     EventEmitter.prototype.removeAllListener = function () {
         this.event = {};
     };
@@ -2460,7 +2467,7 @@ function onMessageArrived(message) {
  * @Author: Whzcorcd
  * @Date: 2020-08-20 10:01:49
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-21 11:05:53
+ * @LastEditTime: 2020-08-21 14:23:59
  * @Description: file content
  */
 var ROP = /** @class */ (function (_super) {
@@ -2475,9 +2482,7 @@ var ROP = /** @class */ (function (_super) {
         _this.subKey_ = '';
         _this.mqttClient_ = null;
         _this.useSSL_ = false;
-        _this.timers = 0;
         _this.state_ = ROP.STATE_INIT;
-        _this.reenter_max_ = 5000;
         _this.reenter_df_ = 1000;
         _this.re_enter_timeout_ = _this.reenter_df_;
         _this.timer_ = null;

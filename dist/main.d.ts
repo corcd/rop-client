@@ -5,21 +5,19 @@ interface IROP {
 }
 declare type Qos = 0 | 1 | 2;
 declare class ROP extends EventEmitter {
-    ROP_FLASH_SITE: string;
-    ICS_ADDR: string;
-    topic_list_: any[];
-    pubKey_: string;
-    subKey_: string;
-    mqttClient_: any;
-    useSSL_: boolean;
-    timers: number;
-    state_: number;
-    reenter_max_: number;
-    reenter_df_: number;
-    re_enter_timeout_: number;
-    enter_times_: number;
-    client_id_: string;
-    timer_: any;
+    private ROP_FLASH_SITE;
+    private ICS_ADDR;
+    private topic_list_;
+    private pubKey_;
+    private subKey_;
+    private mqttClient_;
+    private useSSL_;
+    private state_;
+    private reenter_df_;
+    private re_enter_timeout_;
+    private enter_times_;
+    private client_id_;
+    private timer_;
     static STATE_INIT: number;
     static STATE_ENTERING: number;
     static STATE_ENTERED: number;

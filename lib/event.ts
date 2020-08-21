@@ -2,15 +2,15 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-20 15:48:37
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-21 11:26:12
+ * @LastEditTime: 2020-08-21 14:22:36
  * @Description: file content
  */
 
 type Event = { [k: string]: any }
 
 export default class EventEmitter {
-  event: Event
-  maxListeners: number
+  private event: Event
+  private maxListeners: number
 
   constructor() {
     this.event = {}

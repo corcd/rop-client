@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-20 10:01:49
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-21 11:05:53
+ * @LastEditTime: 2020-08-21 14:23:59
  * @Description: file content
  */
 
@@ -17,22 +17,20 @@ interface IROP {
 type Qos = 0 | 1 | 2
 
 class ROP extends EventEmitter {
-  ROP_FLASH_SITE: string
-  ICS_ADDR: string
+  private ROP_FLASH_SITE: string
+  private ICS_ADDR: string
 
-  topic_list_: any[]
-  pubKey_: string
-  subKey_: string
-  mqttClient_: any
-  useSSL_: boolean
-  timers: number
-  state_: number
-  reenter_max_: number
-  reenter_df_: number
-  re_enter_timeout_: number
-  enter_times_: number
-  client_id_: string
-  timer_: any
+  private topic_list_: any[]
+  private pubKey_: string
+  private subKey_: string
+  private mqttClient_: any
+  private useSSL_: boolean
+  private state_: number
+  private reenter_df_: number
+  private re_enter_timeout_: number
+  private enter_times_: number
+  private client_id_: string
+  private timer_: any
 
   static STATE_INIT = 0
   static STATE_ENTERING = 4
@@ -51,11 +49,9 @@ class ROP extends EventEmitter {
     this.subKey_ = ''
     this.mqttClient_ = null
     this.useSSL_ = false
-    this.timers = 0
 
     this.state_ = ROP.STATE_INIT
 
-    this.reenter_max_ = 5000
     this.reenter_df_ = 1000
     this.re_enter_timeout_ = this.reenter_df_
     this.timer_ = null
