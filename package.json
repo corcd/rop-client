@@ -1,0 +1,25 @@
+{
+  "name": "rop",
+  "version": "1.1.3",
+  "description": "rop client",
+  "main": "index.js",
+  "scripts": {
+    "compile": "tsc",
+    "build": "rollup --config"
+  },
+  "author": "whzcorcd",
+  "license": "ISC",
+  "dependencies": {
+    "@types/paho-mqtt": "^1.0.4",
+    "paho-mqtt": "^1.1.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^5.0.2",
+    "@types/node": "^14.6.0",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-typescript2": "^0.27.2",
+    "tslib": "^2.0.1",
+    "typescript": "^3.9.7"
+  }
+}

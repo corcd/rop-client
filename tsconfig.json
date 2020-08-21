@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "ESNext",
+    "lib": ["es5", "es6", "dom"],
+    "moduleResolution": "node",
+    "declaration": true,
+    "outDir": "./output",
+    "strict": true,
+    "baseUrl": ".",
+    "preserveSymlinks": true,
+    "esModuleInterop": true,
+  },
+  "include": ["lib/*.ts", "../../javascript/*.ts"],
+  "exclude": ["node_modules"]
+}
