@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-21 11:37:56
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-21 11:47:47
+ * @LastEditTime: 2020-08-21 12:24:45
  * @Description: file content
 -->
 # Rop Client
@@ -29,12 +29,12 @@ rc.On('*', () => {})
 ### NPM 安装
 
 ```bash
-sudo npm install rop-client --save
-sudo yarn add rop-client
+sudo npm install @whzcorcd/rop-client --save
+sudo yarn add @whzcorcd/rop-client
 ```
 
 ```javascript
-import ROP from 'rop-client'
+import ROP from '@whzcorcd/rop-client'
 
 const rc = new ROP({
   ICS_ADDR: '*',
