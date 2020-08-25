@@ -29,19 +29,11 @@ function __extends(d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 }
 
-/*
- * @Author: Whzcorcd
- * @Date: 2020-08-20 15:48:37
- * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-21 14:22:36
- * @Description: file content
- */
-var EventEmitter = /** @class */ (function () {
+var EventEmitter = (function () {
     function EventEmitter() {
         this.event = {};
         this.maxListeners = 10;
     }
-    // 监听
     EventEmitter.prototype.on = function (type, listener) {
         if (this.event[type]) {
             if (this.event[type].length >= this.maxListeners) {
@@ -54,7 +46,6 @@ var EventEmitter = /** @class */ (function () {
             this.event[type] = [listener];
         }
     };
-    // 发送监听
     EventEmitter.prototype.emit = function (type) {
         var _this = this;
         var args = [];
@@ -65,14 +56,12 @@ var EventEmitter = /** @class */ (function () {
             this.event[type].map(function (fn) { return fn.apply(_this, args); });
         }
     };
-    // 移除监听器
     EventEmitter.prototype.removeListener = function (type) {
         if (this.event[type]) {
             delete this.event[type];
             console.log(this.event);
         }
     };
-    // 移除所有的监听器
     EventEmitter.prototype.removeAllListener = function () {
         this.event = {};
     };
@@ -2463,14 +2452,7 @@ function onMessageArrived(message) {
 });
 });
 
-/*
- * @Author: Whzcorcd
- * @Date: 2020-08-20 10:01:49
- * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-21 14:23:59
- * @Description: file content
- */
-var ROP = /** @class */ (function (_super) {
+var ROP = (function (_super) {
     __extends(ROP, _super);
     function ROP(options) {
         var _this = _super.call(this) || this;
@@ -2496,8 +2478,8 @@ var ROP = /** @class */ (function (_super) {
         for (var i = 0; i < 36; i++) {
             s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
         }
-        s[14] = '4'; // bits 12-15 of the time_hi_and_version field to 0010
-        s[19] = hexDigits.substr(s[19] | 0x8, 1); // bits 6-7 of the clock_seq_hi_and_reserved to 01
+        s[14] = '4';
+        s[19] = hexDigits.substr(s[19] | 0x8, 1);
         s[8] = s[13] = s[18] = s[23] = '-';
         return s.join('');
     };
@@ -2539,8 +2521,6 @@ var ROP = /** @class */ (function (_super) {
         }
         if (this.useSSL_) {
             port_ = 8300;
-            // TODO mqtt ssl
-            // this.ICS_ADDR = 'mqttdms.aodianyun.com'
         }
         else {
             port_ = 8000;

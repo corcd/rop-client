@@ -2,23 +2,18 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-20 10:01:49
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-21 14:23:59
+ * @LastEditTime: 2020-08-25 15:20:12
  * @Description: file content
  */
+
+import { IROP, Qos } from './types'
 
 import EventEmitter from './event'
 import Paho from 'paho-mqtt'
 
-interface IROP {
-  ICS_ADDR: string
-  ROP_FLASH_SITE: string
-}
-
-type Qos = 0 | 1 | 2
-
 class ROP extends EventEmitter {
-  private ROP_FLASH_SITE: string
-  private ICS_ADDR: string
+  public ROP_FLASH_SITE: string
+  public ICS_ADDR: string
 
   private topic_list_: any[]
   private pubKey_: string
@@ -85,19 +80,19 @@ class ROP extends EventEmitter {
     }
   }
 
-  private InternalSubscribe(topic: string, qos: number = 0) {
+  private InternalSubscribe(topic: string, qos: number = 0): void {
     if (this.state_ === ROP.STATE_ENTERED) {
       this.mqttClient_.subscribe(topic, { qos: qos })
     }
   }
 
-  private InternalUnSubscribe(topic: string) {
+  private InternalUnSubscribe(topic: string): void {
     if (this.state_ === ROP.STATE_ENTERED) {
       this.mqttClient_.unsubscribe(topic)
     }
   }
 
-  private InternalEnter() {
+  private InternalEnter(): void {
     if (this.timer_) {
       clearTimeout(this.timer_)
       this.timer_ = null
@@ -195,7 +190,12 @@ class ROP extends EventEmitter {
     }
   }
 
-  Enter(pubKey: string, subKey: string, client_id: string, useSSL: boolean) {
+  public Enter(
+    pubKey: string,
+    subKey: string,
+    client_id: string,
+    useSSL: boolean
+  ): void {
     if (this.state_ === ROP.STATE_INIT) {
       this.state_ = ROP.STATE_ENTERING
       this.pubKey_ = pubKey
@@ -212,7 +212,7 @@ class ROP extends EventEmitter {
     }
   }
 
-  Leave() {
+  public Leave(): void {
     this.state_ = ROP.STATE_INIT
     this.enter_times_ = 0
     clearTimeout(this.timer_)
@@ -223,11 +223,16 @@ class ROP extends EventEmitter {
     }
   }
 
-  On(evt: string, func: any) {
+  public On(evt: string, func: any): void {
     super.on(evt, func)
   }
 
-  Publish(body: string, topic: string, qos: Qos = 0, retain: boolean = true) {
+  public Publish(
+    body: string,
+    topic: string,
+    qos: Qos = 0,
+    retain: boolean = true
+  ): void {
     if (this.state_ === ROP.STATE_ENTERED) {
       const message = new Paho.Message(body)
       message.destinationName = topic
@@ -237,7 +242,7 @@ class ROP extends EventEmitter {
     }
   }
 
-  Subscribe(topic: string, qos: number = 0) {
+  public Subscribe(topic: string, qos: number = 0): void {
     const strTopic = topic.toString()
     if (!topic || topic.length === 0) return
     for (let k = 0; k < this.topic_list_.length; k++) {
@@ -253,7 +258,7 @@ class ROP extends EventEmitter {
     this.InternalSubscribe(strTopic, numQos)
   }
 
-  UnSubscribe(topic: string) {
+  public UnSubscribe(topic: string): void {
     const strTopic = topic.toString()
     if (!strTopic || strTopic.length === 0) return
 

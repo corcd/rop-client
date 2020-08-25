@@ -2,11 +2,11 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-20 15:48:37
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-21 14:22:36
+ * @LastEditTime: 2020-08-25 15:20:29
  * @Description: file content
  */
 
-type Event = { [k: string]: any }
+import { Event } from './types'
 
 export default class EventEmitter {
   private event: Event
@@ -18,7 +18,7 @@ export default class EventEmitter {
   }
 
   // 监听
-  on(type: string, listener: any) {
+  public on(type: string, listener: any): void {
     if (this.event[type]) {
       if (this.event[type].length >= this.maxListeners) {
         console.error(
@@ -33,14 +33,14 @@ export default class EventEmitter {
   }
 
   // 发送监听
-  emit(type: string, ...args: any[]) {
+  public emit(type: string, ...args: any[]): void {
     if (this.event[type]) {
       this.event[type].map((fn: any) => fn.apply(this, args))
     }
   }
 
   // 移除监听器
-  removeListener(type: string) {
+  public removeListener(type: string): void {
     if (this.event[type]) {
       delete this.event[type]
       console.log(this.event)
@@ -48,7 +48,7 @@ export default class EventEmitter {
   }
 
   // 移除所有的监听器
-  removeAllListener() {
+  public removeAllListener(): void {
     this.event = {}
   }
 }

@@ -1,12 +1,8 @@
+import { IROP, Qos } from './types';
 import EventEmitter from './event';
-interface IROP {
-    ICS_ADDR: string;
-    ROP_FLASH_SITE: string;
-}
-declare type Qos = 0 | 1 | 2;
 declare class ROP extends EventEmitter {
-    private ROP_FLASH_SITE;
-    private ICS_ADDR;
+    ROP_FLASH_SITE: string;
+    ICS_ADDR: string;
     private topic_list_;
     private pubKey_;
     private subKey_;

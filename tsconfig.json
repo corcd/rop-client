@@ -3,6 +3,10 @@
     "target": "es5",
     "module": "ESNext",
     "lib": ["es5", "es6", "dom"],
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
     "moduleResolution": "node",
     "declaration": true,
     "outDir": "./output",
@@ -11,6 +15,6 @@
     "preserveSymlinks": true,
     "esModuleInterop": true,
   },
-  "include": ["lib/*.ts", "../../javascript/*.ts"],
+  "include": ["src/*.ts"],
   "exclude": ["node_modules"]
 }
