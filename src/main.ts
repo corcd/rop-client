@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-20 10:01:49
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-25 15:20:12
+ * @LastEditTime: 2020-10-20 11:13:38
  * @Description: file content
  */
 
@@ -117,6 +117,7 @@ class ROP extends EventEmitter {
     if (this.mqttClient_) {
       try {
         this.mqttClient_.disconnect()
+        this.mqttClient_ = null
       } catch (err) {
         console.error(err)
       }
@@ -217,7 +218,10 @@ class ROP extends EventEmitter {
     this.enter_times_ = 0
     clearTimeout(this.timer_)
     try {
-      if (this.mqttClient_) this.mqttClient_.disconnect()
+      if (this.mqttClient_) {
+        this.mqttClient_.disconnect()
+        this.mqttClient_ = null
+      }
     } catch (err) {
       console.error(err)
     }

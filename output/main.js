@@ -89,6 +89,7 @@ var ROP = (function (_super) {
         if (this.mqttClient_) {
             try {
                 this.mqttClient_.disconnect();
+                this.mqttClient_ = null;
             }
             catch (err) {
                 console.error(err);
@@ -180,8 +181,10 @@ var ROP = (function (_super) {
         this.enter_times_ = 0;
         clearTimeout(this.timer_);
         try {
-            if (this.mqttClient_)
+            if (this.mqttClient_) {
                 this.mqttClient_.disconnect();
+                this.mqttClient_ = null;
+            }
         }
         catch (err) {
             console.error(err);
