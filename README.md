@@ -1,13 +1,6 @@
-<!--
- * @Author: Whzcorcd
- * @Date: 2020-08-21 11:37:56
- * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-21 12:24:45
- * @Description: file content
--->
 # Rop Client
 
-基于 typescript 重写的 class 语法 rop 客户端
+基于 typescript 重写的 ROP 客户端
 
 ## usage
 
@@ -20,7 +13,9 @@ import ROP from '***.js'
 
 const rc = new ROP({
   ICS_ADDR: '*',
-  ROP_FLASH_SITE: '//*'
+  ROP_FLASH_SITE: '*',
+  PORT: xxxx,
+  SSL_PORT: xxxx
 })
 
 rc.On('*', () => {})
@@ -29,12 +24,12 @@ rc.On('*', () => {})
 ### NPM 安装
 
 ```bash
-sudo npm install @whzcorcd/rop-client --save
-sudo yarn add @whzcorcd/rop-client
+sudo npm install @gdyfe/rop-client --save
+sudo yarn add @gdyfe/rop-client
 ```
 
 ```javascript
-import ROP from '@whzcorcd/rop-client'
+import ROP from '@gdyfe/rop-client'
 
 const rc = new ROP({
   ICS_ADDR: '*',

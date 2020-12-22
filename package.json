@@ -1,22 +1,33 @@
 {
-  "name": "@whzcorcd/rop-client",
-  "version": "1.1.7",
+  "name": "@gdyfe/rop-client",
+  "version": "1.2.0",
   "description": "rop client",
   "private": false,
-  "main": "dist/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "module": "esm/main.js",
+  "keywords": [
+    "ROP",
+    "mqtt"
+  ],
+  "homepage": "https://github.com/corcd/rop-client",
+  "repository": "https://github.com/corcd/rop-client.git",
   "scripts": {
     "compile": "tsc",
-    "build": "rollup --config"
+    "build": "tsc && rollup --config"
   },
   "author": "whzcorcd",
   "license": "ISC",
   "dependencies": {
-    "@types/paho-mqtt": "^1.0.4",
     "paho-mqtt": "^1.1.0"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^5.0.2",
     "@types/node": "^14.6.0",
+    "@types/paho-mqtt": "^1.0.4",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-typescript2": "^0.27.2",

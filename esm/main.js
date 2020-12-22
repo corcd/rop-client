@@ -15,22 +15,26 @@ import EventEmitter from './event';
 import Paho from 'paho-mqtt';
 var ROP = (function (_super) {
     __extends(ROP, _super);
-    function ROP(options) {
-        var _this = _super.call(this) || this;
-        console.log(options);
-        _this.ICS_ADDR = options.ICS_ADDR || 'mqttdms.aodianyun.com';
-        _this.ROP_FLASH_SITE = options.ROP_FLASH_SITE || '//cdn.aodianyun.com/dms/';
-        _this.topic_list_ = [];
-        _this.pubKey_ = '';
-        _this.subKey_ = '';
-        _this.mqttClient_ = null;
-        _this.useSSL_ = false;
-        _this.state_ = ROP.STATE_INIT;
-        _this.reenter_df_ = 1000;
-        _this.re_enter_timeout_ = _this.reenter_df_;
-        _this.timer_ = null;
-        _this.enter_times_ = 0;
-        _this.client_id_ = '';
+    function ROP(_a) {
+        var _b = _a.ICS_ADDR, ICS_ADDR = _b === void 0 ? 'mqttdms.aodianyun.com' : _b, _c = _a.ROP_FLASH_SITE, ROP_FLASH_SITE = _c === void 0 ? 'cdn.aodianyun.com/dms/' : _c, _d = _a.PORT, PORT = _d === void 0 ? 8000 : _d, _e = _a.SSL_PORT, SSL_PORT = _e === void 0 ? 8300 : _e;
+        var _this = this;
+        console.log(ICS_ADDR, ROP_FLASH_SITE, PORT, SSL_PORT);
+        _this = _super.call(this) || this;
+        _this.ICS_ADDR = ICS_ADDR;
+        _this.ROP_FLASH_SITE = "//" + ROP_FLASH_SITE;
+        _this.PORT = PORT;
+        _this.SSL_PORT = SSL_PORT;
+        _this._topicList = [];
+        _this._pubKey = '';
+        _this._subKey = '';
+        _this._mqttClient = null;
+        _this._useSSL = false;
+        _this._state = ROP.STATE_INIT;
+        _this._reenterDf = 1000;
+        _this._reEnterTimeout = _this._reenterDf;
+        _this._timer = null;
+        _this._enterTimes = 0;
+        _this._clientId = '';
         return _this;
     }
     ROP.prototype.getUuid = function () {
@@ -46,63 +50,63 @@ var ROP = (function (_super) {
     };
     ROP.prototype.ReEnter = function () {
         var _this = this;
-        if (this.timer_)
+        if (this._timer)
             return;
-        if (this.state_ === ROP.STATE_ENTERED || ROP.STATE_REENTERING) {
-            this.state_ = ROP.STATE_REENTERING;
-            this.timer_ = setTimeout(function () { return _this.InternalEnter(); }, this.re_enter_timeout_);
-            this.re_enter_timeout_ += this.reenter_df_;
-            this.re_enter_timeout_ = Math.min(this.re_enter_timeout_, 5000);
+        if (this._state === ROP.STATE_ENTERED || ROP.STATE_REENTERING) {
+            this._state = ROP.STATE_REENTERING;
+            this._timer = setTimeout(function () { return _this.InternalEnter(); }, this._reEnterTimeout);
+            this._reEnterTimeout += this._reenterDf;
+            this._reEnterTimeout = Math.min(this._reEnterTimeout, 5000);
         }
     };
     ROP.prototype.InternalSubscribe = function (topic, qos) {
         if (qos === void 0) { qos = 0; }
-        if (this.state_ === ROP.STATE_ENTERED) {
-            this.mqttClient_.subscribe(topic, { qos: qos });
+        if (this._state === ROP.STATE_ENTERED) {
+            this._mqttClient.subscribe(topic, { qos: qos });
         }
     };
     ROP.prototype.InternalUnSubscribe = function (topic) {
-        if (this.state_ === ROP.STATE_ENTERED) {
-            this.mqttClient_.unsubscribe(topic);
+        if (this._state === ROP.STATE_ENTERED) {
+            this._mqttClient.unsubscribe(topic);
         }
     };
     ROP.prototype.InternalEnter = function () {
         var _this = this;
-        if (this.timer_) {
-            clearTimeout(this.timer_);
-            this.timer_ = null;
+        if (this._timer) {
+            clearTimeout(this._timer);
+            this._timer = null;
         }
-        var port_ = 0;
-        if (this.state_ === ROP.STATE_REENTERING) {
+        var _port = 0;
+        if (this._state === ROP.STATE_REENTERING) {
             _super.prototype.emit.call(this, 'reconnect');
         }
-        if (!this.client_id_) {
-            console.log(this.client_id_);
-            this.client_id_ = "ws2-" + this.getUuid();
+        if (!this._clientId) {
+            console.log(this._clientId);
+            this._clientId = "ws2-" + this.getUuid();
         }
-        if (this.useSSL_) {
-            port_ = 8300;
+        if (this._useSSL) {
+            _port = this.SSL_PORT;
         }
         else {
-            port_ = 8000;
+            _port = this.PORT;
         }
-        if (this.mqttClient_) {
+        if (this._mqttClient) {
             try {
-                this.mqttClient_.disconnect();
-                this.mqttClient_ = null;
+                this._mqttClient.disconnect();
+                this._mqttClient = null;
             }
             catch (err) {
                 console.error(err);
             }
         }
-        this.mqttClient_ = new Paho.Client(this.ICS_ADDR, port_, this.client_id_);
-        this.mqttClient_.onConnectionLost = function (responseObject) {
+        this._mqttClient = new Paho.Client(this.ICS_ADDR, _port, this._clientId);
+        this._mqttClient.onConnectionLost = function (responseObject) {
             if (responseObject.errorCode !== 0) {
                 _super.prototype.emit.call(_this, 'offline', responseObject.errorMessage);
                 _this.ReEnter();
             }
         };
-        this.mqttClient_.onMessageArrived = function (message) {
+        this._mqttClient.onMessageArrived = function (message) {
             if (message.destinationName === '__sys__') {
                 try {
                     var msg = JSON.parse(message.payloadString);
@@ -120,27 +124,27 @@ var ROP = (function (_super) {
             _super.prototype.emit.call(_this, 'publish_data', message.payloadString, message.destinationName);
         };
         try {
-            this.mqttClient_.connect({
+            this._mqttClient.connect({
                 timeout: 10,
-                userName: this.pubKey_,
-                password: this.subKey_,
+                userName: this._pubKey,
+                password: this._subKey,
                 keepAliveInterval: 60,
                 cleanSession: true,
-                useSSL: this.useSSL_,
+                useSSL: this._useSSL,
                 onSuccess: function () {
-                    _this.state_ = ROP.STATE_ENTERED;
-                    _this.re_enter_timeout_ = _this.reenter_df_;
-                    _this.topic_list_.map(function (item) {
+                    _this._state = ROP.STATE_ENTERED;
+                    _this._reEnterTimeout = _this._reenterDf;
+                    _this._topicList.map(function (item) {
                         return _this.InternalSubscribe(item.topic, item.qos);
                     });
                     _super.prototype.emit.call(_this, 'enter_suc');
                 },
                 onFailure: function (err) {
-                    if (_this.state_ === ROP.STATE_ENTERING) {
+                    if (_this._state === ROP.STATE_ENTERING) {
                         console.log(err);
-                        if (_this.enter_times_++ >= 3) {
-                            _this.state_ = ROP.STATE_ENTER_FAILED;
-                            _this.enter_times_ = 0;
+                        if (_this._enterTimes++ >= 3) {
+                            _this._state = ROP.STATE_ENTER_FAILED;
+                            _this._enterTimes = 0;
                             _super.prototype.emit.call(_this, 'enter_fail', err.errorMessage);
                             _this.Leave();
                         }
@@ -148,7 +152,7 @@ var ROP = (function (_super) {
                             setTimeout(function () { return _this.InternalEnter(); }, 1000);
                         }
                     }
-                    else if (_this.state_ === ROP.STATE_REENTERING) {
+                    else if (_this._state === ROP.STATE_REENTERING) {
                         console.error(err);
                         _super.prototype.emit.call(_this, 'offline', err.errorMessage);
                         _this.ReEnter();
@@ -161,29 +165,29 @@ var ROP = (function (_super) {
             this.ReEnter();
         }
     };
-    ROP.prototype.Enter = function (pubKey, subKey, client_id, useSSL) {
-        if (this.state_ === ROP.STATE_INIT) {
-            this.state_ = ROP.STATE_ENTERING;
-            this.pubKey_ = pubKey;
-            this.useSSL_ = !!useSSL;
-            this.subKey_ = subKey;
-            if (!this.subKey_) {
-                this.subKey_ = pubKey;
+    ROP.prototype.Enter = function (pubKey, subKey, clientId, useSSL) {
+        if (this._state === ROP.STATE_INIT) {
+            this._state = ROP.STATE_ENTERING;
+            this._pubKey = pubKey;
+            this._useSSL = !!useSSL;
+            this._subKey = subKey;
+            if (!this._subKey) {
+                this._subKey = pubKey;
             }
-            if (client_id) {
-                this.client_id_ = client_id;
+            if (clientId) {
+                this._clientId = clientId;
             }
             this.InternalEnter();
         }
     };
     ROP.prototype.Leave = function () {
-        this.state_ = ROP.STATE_INIT;
-        this.enter_times_ = 0;
-        clearTimeout(this.timer_);
+        this._state = ROP.STATE_INIT;
+        this._enterTimes = 0;
+        clearTimeout(this._timer);
         try {
-            if (this.mqttClient_) {
-                this.mqttClient_.disconnect();
-                this.mqttClient_ = null;
+            if (this._mqttClient) {
+                this._mqttClient.disconnect();
+                this._mqttClient = null;
             }
         }
         catch (err) {
@@ -196,12 +200,12 @@ var ROP = (function (_super) {
     ROP.prototype.Publish = function (body, topic, qos, retain) {
         if (qos === void 0) { qos = 0; }
         if (retain === void 0) { retain = true; }
-        if (this.state_ === ROP.STATE_ENTERED) {
+        if (this._state === ROP.STATE_ENTERED) {
             var message = new Paho.Message(body);
             message.destinationName = topic;
             message.qos = qos;
             message.retained = Boolean(retain);
-            this.mqttClient_.send(message);
+            this._mqttClient.send(message);
         }
     };
     ROP.prototype.Subscribe = function (topic, qos) {
@@ -209,8 +213,8 @@ var ROP = (function (_super) {
         var strTopic = topic.toString();
         if (!topic || topic.length === 0)
             return;
-        for (var k = 0; k < this.topic_list_.length; k++) {
-            if (this.topic_list_[k].topic === strTopic) {
+        for (var k = 0; k < this._topicList.length; k++) {
+            if (this._topicList[k].topic === strTopic) {
                 return;
             }
         }
@@ -219,7 +223,7 @@ var ROP = (function (_super) {
             numQos = 2;
         if (numQos < 0)
             numQos = 0;
-        this.topic_list_.push({ topic: strTopic, qos: numQos });
+        this._topicList.push({ topic: strTopic, qos: numQos });
         this.InternalSubscribe(strTopic, numQos);
     };
     ROP.prototype.UnSubscribe = function (topic) {
@@ -227,9 +231,9 @@ var ROP = (function (_super) {
         var strTopic = topic.toString();
         if (!strTopic || strTopic.length === 0)
             return;
-        this.topic_list_.forEach(function (item, index) {
+        this._topicList.forEach(function (item, index) {
             if (item.topic === strTopic) {
-                _this.topic_list_.splice(index, 1);
+                _this._topicList.splice(index, 1);
                 _this.InternalUnSubscribe(strTopic);
             }
         });

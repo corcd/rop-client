@@ -9,7 +9,7 @@
     "preserveConstEnums": true,
     "moduleResolution": "node",
     "declaration": true,
-    "outDir": "./output",
+    "outDir": "./esm",
     "strict": true,
     "baseUrl": ".",
     "preserveSymlinks": true,

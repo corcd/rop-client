@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-20 10:01:49
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-10-20 11:13:38
+ * @LastEditTime: 2020-10-27 18:21:08
  * @Description: file content
  */
 
@@ -14,18 +14,20 @@ import Paho from 'paho-mqtt'
 class ROP extends EventEmitter {
   public ROP_FLASH_SITE: string
   public ICS_ADDR: string
+  public PORT: number
+  public SSL_PORT: number
 
-  private topic_list_: any[]
-  private pubKey_: string
-  private subKey_: string
-  private mqttClient_: any
-  private useSSL_: boolean
-  private state_: number
-  private reenter_df_: number
-  private re_enter_timeout_: number
-  private enter_times_: number
-  private client_id_: string
-  private timer_: any
+  private _topicList: any[]
+  private _pubKey: string
+  private _subKey: string
+  private _mqttClient: any
+  private _useSSL: boolean
+  private _state: number
+  private _reenterDf: number
+  private _reEnterTimeout: number
+  private _enterTimes: number
+  private _clientId: string
+  private _timer: any
 
   static STATE_INIT = 0
   static STATE_ENTERING = 4
@@ -33,25 +35,33 @@ class ROP extends EventEmitter {
   static STATE_ENTER_FAILED = 6
   static STATE_REENTERING = 7
 
-  constructor(options: IROP) {
+  constructor({
+    ICS_ADDR = 'mqttdms.aodianyun.com',
+    ROP_FLASH_SITE = 'cdn.aodianyun.com/dms/',
+    PORT = 8000,
+    SSL_PORT = 8300,
+  }: IROP) {
+    console.log(ICS_ADDR, ROP_FLASH_SITE, PORT, SSL_PORT)
     super()
-    console.log(options)
-    this.ICS_ADDR = options.ICS_ADDR || 'mqttdms.aodianyun.com'
-    this.ROP_FLASH_SITE = options.ROP_FLASH_SITE || '//cdn.aodianyun.com/dms/'
 
-    this.topic_list_ = []
-    this.pubKey_ = ''
-    this.subKey_ = ''
-    this.mqttClient_ = null
-    this.useSSL_ = false
+    this.ICS_ADDR = ICS_ADDR
+    this.ROP_FLASH_SITE = `//${ROP_FLASH_SITE}`
+    this.PORT = PORT
+    this.SSL_PORT = SSL_PORT
 
-    this.state_ = ROP.STATE_INIT
+    this._topicList = []
+    this._pubKey = ''
+    this._subKey = ''
+    this._mqttClient = null
+    this._useSSL = false
 
-    this.reenter_df_ = 1000
-    this.re_enter_timeout_ = this.reenter_df_
-    this.timer_ = null
-    this.enter_times_ = 0
-    this.client_id_ = ''
+    this._state = ROP.STATE_INIT
+
+    this._reenterDf = 1000
+    this._reEnterTimeout = this._reenterDf
+    this._timer = null
+    this._enterTimes = 0
+    this._clientId = ''
   }
 
   private getUuid(): string {
@@ -68,62 +78,60 @@ class ROP extends EventEmitter {
   }
 
   private ReEnter(): void {
-    if (this.timer_) return
-    if (this.state_ === ROP.STATE_ENTERED || ROP.STATE_REENTERING) {
-      this.state_ = ROP.STATE_REENTERING
-      this.timer_ = setTimeout(
-        () => this.InternalEnter(),
-        this.re_enter_timeout_
-      )
-      this.re_enter_timeout_ += this.reenter_df_
-      this.re_enter_timeout_ = Math.min(this.re_enter_timeout_, 5000)
+    if (this._timer) return
+
+    if (this._state === ROP.STATE_ENTERED || ROP.STATE_REENTERING) {
+      this._state = ROP.STATE_REENTERING
+      this._timer = setTimeout(() => this.InternalEnter(), this._reEnterTimeout)
+      this._reEnterTimeout += this._reenterDf
+      this._reEnterTimeout = Math.min(this._reEnterTimeout, 5000)
     }
   }
 
   private InternalSubscribe(topic: string, qos: number = 0): void {
-    if (this.state_ === ROP.STATE_ENTERED) {
-      this.mqttClient_.subscribe(topic, { qos: qos })
+    if (this._state === ROP.STATE_ENTERED) {
+      this._mqttClient.subscribe(topic, { qos: qos })
     }
   }
 
   private InternalUnSubscribe(topic: string): void {
-    if (this.state_ === ROP.STATE_ENTERED) {
-      this.mqttClient_.unsubscribe(topic)
+    if (this._state === ROP.STATE_ENTERED) {
+      this._mqttClient.unsubscribe(topic)
     }
   }
 
   private InternalEnter(): void {
-    if (this.timer_) {
-      clearTimeout(this.timer_)
-      this.timer_ = null
+    if (this._timer) {
+      clearTimeout(this._timer)
+      this._timer = null
     }
 
-    let port_ = 0
+    let _port = 0
 
-    if (this.state_ === ROP.STATE_REENTERING) {
+    if (this._state === ROP.STATE_REENTERING) {
       super.emit('reconnect')
     }
-    if (!this.client_id_) {
-      console.log(this.client_id_)
-      this.client_id_ = `ws2-${this.getUuid()}`
+    if (!this._clientId) {
+      console.log(this._clientId)
+      this._clientId = `ws2-${this.getUuid()}`
     }
-    if (this.useSSL_) {
-      port_ = 8300
+    if (this._useSSL) {
+      _port = this.SSL_PORT
       // TODO mqtt ssl
       // this.ICS_ADDR = 'mqttdms.aodianyun.com'
     } else {
-      port_ = 8000
+      _port = this.PORT
     }
-    if (this.mqttClient_) {
+    if (this._mqttClient) {
       try {
-        this.mqttClient_.disconnect()
-        this.mqttClient_ = null
+        this._mqttClient.disconnect()
+        this._mqttClient = null
       } catch (err) {
         console.error(err)
       }
     }
-    this.mqttClient_ = new Paho.Client(this.ICS_ADDR, port_, this.client_id_)
-    this.mqttClient_.onConnectionLost = (responseObject: {
+    this._mqttClient = new Paho.Client(this.ICS_ADDR, _port, this._clientId)
+    this._mqttClient.onConnectionLost = (responseObject: {
       errorCode: number
       errorMessage: any
     }) => {
@@ -132,7 +140,7 @@ class ROP extends EventEmitter {
         this.ReEnter()
       }
     }
-    this.mqttClient_.onMessageArrived = (message: {
+    this._mqttClient.onMessageArrived = (message: {
       destinationName: string
       payloadString: string
     }) => {
@@ -152,33 +160,33 @@ class ROP extends EventEmitter {
       super.emit('publish_data', message.payloadString, message.destinationName)
     }
     try {
-      this.mqttClient_.connect({
+      this._mqttClient.connect({
         timeout: 10, // connect timeout
-        userName: this.pubKey_,
-        password: this.subKey_,
+        userName: this._pubKey,
+        password: this._subKey,
         keepAliveInterval: 60, // keepalive
         cleanSession: true,
-        useSSL: this.useSSL_,
+        useSSL: this._useSSL,
         onSuccess: () => {
-          this.state_ = ROP.STATE_ENTERED
-          this.re_enter_timeout_ = this.reenter_df_
-          this.topic_list_.map(item =>
+          this._state = ROP.STATE_ENTERED
+          this._reEnterTimeout = this._reenterDf
+          this._topicList.map(item =>
             this.InternalSubscribe(item.topic, item.qos)
           )
           super.emit('enter_suc')
         },
         onFailure: (err: { errorMessage: string }) => {
-          if (this.state_ === ROP.STATE_ENTERING) {
+          if (this._state === ROP.STATE_ENTERING) {
             console.log(err)
-            if (this.enter_times_++ >= 3) {
-              this.state_ = ROP.STATE_ENTER_FAILED
-              this.enter_times_ = 0
+            if (this._enterTimes++ >= 3) {
+              this._state = ROP.STATE_ENTER_FAILED
+              this._enterTimes = 0
               super.emit('enter_fail', err.errorMessage)
               this.Leave()
             } else {
               setTimeout(() => this.InternalEnter(), 1000)
             }
-          } else if (this.state_ === ROP.STATE_REENTERING) {
+          } else if (this._state === ROP.STATE_REENTERING) {
             console.error(err)
             super.emit('offline', err.errorMessage)
             this.ReEnter()
@@ -194,19 +202,19 @@ class ROP extends EventEmitter {
   public Enter(
     pubKey: string,
     subKey: string,
-    client_id: string,
+    clientId: string,
     useSSL: boolean
   ): void {
-    if (this.state_ === ROP.STATE_INIT) {
-      this.state_ = ROP.STATE_ENTERING
-      this.pubKey_ = pubKey
-      this.useSSL_ = !!useSSL
-      this.subKey_ = subKey
-      if (!this.subKey_) {
-        this.subKey_ = pubKey
+    if (this._state === ROP.STATE_INIT) {
+      this._state = ROP.STATE_ENTERING
+      this._pubKey = pubKey
+      this._useSSL = !!useSSL
+      this._subKey = subKey
+      if (!this._subKey) {
+        this._subKey = pubKey
       }
-      if (client_id) {
-        this.client_id_ = client_id
+      if (clientId) {
+        this._clientId = clientId
       }
 
       this.InternalEnter()
@@ -214,13 +222,13 @@ class ROP extends EventEmitter {
   }
 
   public Leave(): void {
-    this.state_ = ROP.STATE_INIT
-    this.enter_times_ = 0
-    clearTimeout(this.timer_)
+    this._state = ROP.STATE_INIT
+    this._enterTimes = 0
+    clearTimeout(this._timer)
     try {
-      if (this.mqttClient_) {
-        this.mqttClient_.disconnect()
-        this.mqttClient_ = null
+      if (this._mqttClient) {
+        this._mqttClient.disconnect()
+        this._mqttClient = null
       }
     } catch (err) {
       console.error(err)
@@ -237,20 +245,20 @@ class ROP extends EventEmitter {
     qos: Qos = 0,
     retain: boolean = true
   ): void {
-    if (this.state_ === ROP.STATE_ENTERED) {
+    if (this._state === ROP.STATE_ENTERED) {
       const message = new Paho.Message(body)
       message.destinationName = topic
       message.qos = qos
       message.retained = Boolean(retain)
-      this.mqttClient_.send(message)
+      this._mqttClient.send(message)
     }
   }
 
   public Subscribe(topic: string, qos: number = 0): void {
     const strTopic = topic.toString()
     if (!topic || topic.length === 0) return
-    for (let k = 0; k < this.topic_list_.length; k++) {
-      if (this.topic_list_[k].topic === strTopic) {
+    for (let k = 0; k < this._topicList.length; k++) {
+      if (this._topicList[k].topic === strTopic) {
         return
       }
     }
@@ -258,7 +266,7 @@ class ROP extends EventEmitter {
     let numQos = Number(qos)
     if (numQos > 2) numQos = 2
     if (numQos < 0) numQos = 0
-    this.topic_list_.push({ topic: strTopic, qos: numQos })
+    this._topicList.push({ topic: strTopic, qos: numQos })
     this.InternalSubscribe(strTopic, numQos)
   }
 
@@ -266,9 +274,9 @@ class ROP extends EventEmitter {
     const strTopic = topic.toString()
     if (!strTopic || strTopic.length === 0) return
 
-    this.topic_list_.forEach((item, index) => {
+    this._topicList.forEach((item, index) => {
       if (item.topic === strTopic) {
-        this.topic_list_.splice(index, 1)
+        this._topicList.splice(index, 1)
         this.InternalUnSubscribe(strTopic)
       }
     })

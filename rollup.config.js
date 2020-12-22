@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2020-08-20 14:44:23
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2020-08-25 15:14:45
+ * @LastEditTime: 2020-12-22 10:32:19
  * @Description: file content
  */
 
@@ -14,8 +14,9 @@ import resolve from 'rollup-plugin-node-resolve'
 export default {
   input: 'src/main.ts',
   output: {
-    file: 'dist/index.js',
-    format: 'cjs',
+    name: 'rop',
+    file: 'dist/main.js',
+    format: 'iife',
     exports: 'auto',
   },
   plugins: [
